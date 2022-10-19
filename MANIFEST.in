@@ -1,0 +1,4 @@
+include stockjockey/schema.sql
+graft stockjockey/static
+graft stockjockey/templates
+global-exclude *.pyc
