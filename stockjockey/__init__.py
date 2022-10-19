@@ -12,6 +12,10 @@ def create_app(test_config=None):
         DATABASE=os.path.join(app.instance_path, 'stockjockey.sqlite'),
     )
 
+    # Register app functions
+    from . import db
+    db.init_app(app)
+
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
@@ -25,16 +29,12 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # Register app functions
-    from . import db
-    db.init_app(app)
-
     # Register blueprints
     from . import auth
     app.register_blueprint(auth.bp)
 
     from . import main
     app.register_blueprint(main.bp)
-    app.add_url_rule('/', endpoint='dashboard')
+    app.add_url_rule('/', endpoint='dashboard')  # forward root page to dashboard
 
     return app
