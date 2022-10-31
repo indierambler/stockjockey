@@ -49,3 +49,30 @@ def create():
             return redirect(url_for('main.dashboard'))
 
     return render_template('main/create.html')
+
+
+def get_post(id, check_author=True):
+    post = get_db().execute(
+        'SELECT p.id, name, ticker'
+        ' FROM post p'
+        ' WHERE p.id = ?',
+        (id,)
+    ).fetchone()
+
+    if post is None:
+        abort(404, f"Post id {id} doesn't exist.")
+
+    if check_author and post['author_id'] != g.user['id']:
+        abort(403)
+
+    return post
+
+
+@bp.route('/<int:id>/delete', methods=('POST',))
+@login_required
+def delete(id):
+    get_post(id)
+    db = get_db()
+    db.execute('DELETE FROM post WHERE id = ?', (id,))
+    db.commit()
+    return redirect(url_for('main.dashboard'))
