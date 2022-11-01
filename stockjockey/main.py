@@ -15,9 +15,6 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 @login_required
 def dashboard():
-    #if not os.path.exists(os.path.join(current_app.instance_path, 'stockjockey.sqlite')):
-    #    init_db()
-    
     db = get_db()
     posts = db.execute(
         'SELECT * FROM asset'
@@ -30,8 +27,6 @@ def dashboard():
 def create():
     if request.method == 'POST':
         ticker = request.form['ticker']
-        exchange = request.form['exchange']
-        sector = request.form['sector']
         error = None
 
         if not ticker:
@@ -42,9 +37,8 @@ def create():
         else:
             db = get_db()
             db.execute(
-                'INSERT INTO asset (ticker, exchange, sector)'
-                ' VALUES (?, ?, ?)',
-                (ticker, exchange, sector)
+                f'INSERT INTO asset (ticker)'
+                f' VALUES ("{ticker}")'
             )
             db.commit()
             return redirect(url_for('main.dashboard'))
