@@ -13,9 +13,10 @@ bp = Blueprint('main', __name__)
 
 
 @bp.route('/')
+@login_required
 def dashboard():
-    if not os.path.exists(os.path.join(current_app.instance_path, 'stockjockey.sqlite')):
-        init_db()
+    #if not os.path.exists(os.path.join(current_app.instance_path, 'stockjockey.sqlite')):
+    #    init_db()
     
     db = get_db()
     posts = db.execute(
