@@ -10,7 +10,7 @@ def get_statements(ticker, n_periods=4):
     fye_month = simfin.get_asset_meta(ticker)['last_fiscal_year_month']
 
     # get the relevant previous years
-    prev_periods = period.last_years(n_years=n_periods-1, include_current=False, fye_month=fye_month)
+    prev_periods = period.last_years(n_years=n_periods - 1, include_current=False, fye_month=fye_month)
     previous = [simfin.get_asset_statement(ticker, year=x) for x in prev_periods]
 
     # get the relevant current and matching last year quarter
@@ -45,9 +45,8 @@ def analyze_revenue(statements):
         last = revs[-1]
 
     max_score = len(revs) - 2
-    #if score == max_score:
+    # if score == max_score:
     #    return True, revs
-    #else:
+    # else:
     #    return False, revs
-    return score/max_score, tuple((x, y, z) for x, y, z in zip(yrs, periods, revs))
-    
+    return score / max_score, tuple((x, y, z) for x, y, z in zip(yrs, periods, revs))

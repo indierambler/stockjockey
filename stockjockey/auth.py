@@ -1,5 +1,6 @@
 # Import dependencies
-import functools, os
+import functools
+import os
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
 )
@@ -46,7 +47,7 @@ def register():
 def login():
     if request.method == 'POST':
         email = request.form['email']
-        username = email  # maybe change to everything before the @ in the email?
+        # username = email  # maybe change to everything before the @ in the email?
         password = request.form['password']
         db = get_db()
         error = None

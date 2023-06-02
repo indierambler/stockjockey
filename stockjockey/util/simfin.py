@@ -1,6 +1,6 @@
 # Import dependencies
 import os
-
+import requests
 
 # Create endpoint building block snippets
 base = 'https://simfin.com/api/v2/'
@@ -9,14 +9,14 @@ key = f'?api-key={os.environ["SIMFIN_KEY"]}'
 
 def get_all_assets():
     """Request a list of all existing SimFin IDs and ticker combinations"""
-    endpoint = base+'companies/list?'+key
+    endpoint = base + 'companies/list?' + key
     response = requests.get(endpoint)
     return [tuple(x) for x in response.json()['data']]
 
 
 def get_asset_meta(ticker, *args, **kwargs):
     """Request general information on a specific ticker"""
-    endpoint = base+'companies/general?'+f'ticker={ticker.upper()}&'+key
+    endpoint = base + 'companies/general?' + f'ticker={ticker.upper()}&' + key
     response = requests.get(endpoint).json()[0]
     meta = {
         'id': response['data'][response['columns'].index('SimFinId')],
@@ -40,6 +40,6 @@ def get_asset_statement(ticker, year, quarter=None, statement='pl', *args, **kwa
     statement (str): type of statement to return pl=profit+loss, bs=balance sheet, cf=cash flow, derived=derived figures and ratios
     """
     period = f'q{quarter}' if quarter else 'fy'  # if no quarter requested get full year
-    endpoint = base+'companies/statements?'+f'ticker={ticker.upper()}&'+f'statement={statement}&'+f'period={period}&'+f'fyear={year}&'+key
+    endpoint = base + 'companies/statements?' + f'ticker={ticker.upper()}&' + f'statement={statement}&' + f'period={period}&' + f'fyear={year}&' + key
     response = requests.get(endpoint).json()[0]
-    return {x: y for x,y in zip(response['columns'], response['data'][0])}  # assume only one report returned (free simfin)
+    return {x: y for x, y in zip(response['columns'], response['data'][0])}  # assume only one report returned (free simfin)

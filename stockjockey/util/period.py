@@ -36,9 +36,9 @@ def last_quarters(n_quarters=4, include_current=False, fye_month=12):
     while len(quarters) < n_quarters:
         if quarters[-1] <= 1:
             quarters.append(4)
-            years.append(years[-1]-1)
+            years.append(years[-1] - 1)
         else:
-            quarters.append(quarters[-1]-1)
+            quarters.append(quarters[-1] - 1)
             years.append(years[-1])
     return tuple(zip(quarters, years))
 
@@ -56,6 +56,5 @@ def last_years(n_years=4, include_current=False, fye_month=12):
 
     # get previous years
     while len(years) < n_years:
-        years.append(years[-1]-1)
+        years.append(years[-1] - 1)
     return tuple(years)
-    
