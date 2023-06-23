@@ -5,7 +5,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from stockjockey.db import get_db, init_db
+from stockjockey.db import get_db, init_db, query_db
 
 
 # Create blueprint
@@ -28,19 +28,11 @@ def register():
 
         if error is None:
             try:
-                # db.execute(
-                #    "INSERT INTO user (email, username, password) VALUES (?, ?, ?)",
-                #    (email, username, generate_password_hash(password)),
-                # )
-                # db.commit()
-                with g.db.cursor() as cursor:
-                    cursor.execute(
+                query_db(
                         f"""INSERT INTO user_meta (email, username, password) VALUES
                         ('{email}', '{username}', '{generate_password_hash(password)}')"""
                     )
-                db.commit()
-                db.close()
-            except db.IntegrityError:
+            except g.db.IntegrityError:
                 error = f"User {email} is already registered."
             else:
                 return redirect(url_for("auth.login"))
@@ -58,14 +50,10 @@ def login():
         password = request.form['password']
         db = get_db()
         error = None
-        # user = db.execute(
-        #    f'SELECT * FROM user WHERE email = "{email}"'
-        # ).fetchone()
-        with g.db.cursor() as cursor:
-            user = cursor.execute(
-                f'SELECT * FROM user_meta WHERE email = "{email}"'
-            ).fetchone()
-        db.close()
+        
+        user = query_db(
+                f"SELECT * FROM user_meta WHERE email = '{email}'"
+            )[0]
 
         if email is None:
             error = 'Incorrect email.'
@@ -89,9 +77,9 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = get_db().execute(
-            f'SELECT * FROM user_meta WHERE id = {user_id}'
-        ).fetchone()
+        g.user = query_db(
+                f'SELECT * FROM user_meta WHERE id = {user_id}'
+            )[0]
 
 
 @bp.route('/logout')
@@ -103,8 +91,9 @@ def logout():
 def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
-        if not os.path.exists(os.path.join(current_app.instance_path, 'stockjockey.sqlite')):
-            init_db()
+        # check if db exists
+        # if not os.path.exists(os.path.join(current_app.instance_path, 'stockjockey.sqlite')):
+        #    init_db()
 
         if g.user is None:
             return redirect(url_for('auth.login'))

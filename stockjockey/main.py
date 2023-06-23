@@ -6,7 +6,7 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 from stockjockey.auth import login_required
-from stockjockey.db import get_db, init_db
+from stockjockey.db import get_db, init_db, query_db
 
 
 # Create blueprint
@@ -16,10 +16,9 @@ bp = Blueprint('main', __name__)
 @bp.route('/')
 @login_required
 def dashboard():
-    db = get_db()
-    posts = db.execute(
+    posts = query_db(
         'SELECT * FROM asset'
-    ).fetchall()
+    )
     return render_template('main/dashboard.html', posts=posts)
 
 
@@ -36,24 +35,22 @@ def create():
         if error is not None:
             flash(error)
         else:
-            db = get_db()
-            db.execute(
-                f'INSERT INTO asset (ticker)'
-                f' VALUES ("{ticker}")'
+            query_db(
+                f"INSERT INTO asset (ticker)"
+                f" VALUES ('{ticker}')"
             )
-            db.commit()
             return redirect(url_for('main.dashboard'))
 
     return render_template('main/create.html')
 
 
 def get_post(id, check_author=True):
-    post = get_db().execute(
+    post = query_db(
         'SELECT p.id, name, ticker'
         ' FROM post p'
         ' WHERE p.id = ?',
         (id,)
-    ).fetchone()
+    )[0]
 
     if post is None:
         abort(404, f"Post id {id} doesn't exist.")
@@ -68,7 +65,5 @@ def get_post(id, check_author=True):
 @login_required
 def delete(id):
     get_post(id)
-    db = get_db()
-    db.execute('DELETE FROM post WHERE id = ?', (id,))
-    db.commit()
+    db = query_db('DELETE FROM post WHERE id = ?', (id,))
     return redirect(url_for('main.dashboard'))
