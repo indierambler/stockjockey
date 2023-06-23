@@ -18,8 +18,8 @@ CREATE TABLE user_meta (
 CREATE OR REPLACE FUNCTION validate_email()
   RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.email !~ '_@__%.%' THEN
-    RAISE EXCEPTION 'Invalid email address';
+  IF NEW.email NOT LIKE '%_@_%._%' THEN
+    RAISE EXCEPTION '% is not a valid email address', NEW.email;
   END IF;
   RETURN NEW;
 END;
