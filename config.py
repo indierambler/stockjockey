@@ -21,15 +21,15 @@ class Config(object):
 
 
 class ConfigProd(Config):
-    # DEBUG = False  # set this in server launch command
+    DEBUG = False  # set this in server launch command
     TESTING = False
 
 
 class ConfigStg(Config):
-    # DEBUG = False  # set this in server launch command
+    DEBUG = False  # set this in server launch command
     TESTING = True
 
 
 class ConfigDev(Config):
-    # DEBUG = True  # set this in server launch command
+    DEBUG = True  # set this in server launch command
     TESTING = True
