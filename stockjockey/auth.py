@@ -28,11 +28,18 @@ def register():
 
         if error is None:
             try:
-                db.execute(
-                    "INSERT INTO user (email, username, password) VALUES (?, ?, ?)",
-                    (email, username, generate_password_hash(password)),
-                )
+                # db.execute(
+                #    "INSERT INTO user (email, username, password) VALUES (?, ?, ?)",
+                #    (email, username, generate_password_hash(password)),
+                # )
+                # db.commit()
+                with g.db.cursor() as cursor:
+                    cursor.execute(
+                        f"""INSERT INTO user_meta (email, username, password) VALUES
+                        ('{email}', '{username}', '{generate_password_hash(password)}')"""
+                    )
                 db.commit()
+                db.close()
             except db.IntegrityError:
                 error = f"User {email} is already registered."
             else:
@@ -51,9 +58,14 @@ def login():
         password = request.form['password']
         db = get_db()
         error = None
-        user = db.execute(
-            f'SELECT * FROM user WHERE email = "{email}"'
-        ).fetchone()
+        # user = db.execute(
+        #    f'SELECT * FROM user WHERE email = "{email}"'
+        # ).fetchone()
+        with g.db.cursor() as cursor:
+            user = cursor.execute(
+                f'SELECT * FROM user_meta WHERE email = "{email}"'
+            ).fetchone()
+        db.close()
 
         if email is None:
             error = 'Incorrect email.'
@@ -78,7 +90,7 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = get_db().execute(
-            f'SELECT * FROM user WHERE id = {user_id}'
+            f'SELECT * FROM user_meta WHERE id = {user_id}'
         ).fetchone()
 
 
