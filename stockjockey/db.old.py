@@ -30,7 +30,7 @@ def close_db(e=None):
 # for postgres db
 
 
-def init_db():
+def init_db(app=current_app):
     # for sqlite3 db
     # db = get_db()
 
@@ -39,7 +39,7 @@ def init_db():
 
     # for postgres db
     SQLAlchemy.init_app
-    db = SQLAlchemy(current_app)
+    db = SQLAlchemy(app)
     return db
 
 

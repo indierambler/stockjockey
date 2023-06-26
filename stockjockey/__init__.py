@@ -4,10 +4,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 
-# Create db engine
-# db = SQLAlchemy()
-
-
 # App Factory
 def create_app(test_config=None):
     # create the app
@@ -21,11 +17,11 @@ def create_app(test_config=None):
     app.config.from_object(config_str)
 
     # load private config values from env
-    # app.config.from_envvar('PRIVATE_CONFIG')
+    # app.config.from_envvar('PRIVATE_CONFIG', default='')
 
-    # Register app functions
-    # from . import db
-    # db = db.init_app(app)  # start db engine
+    # register CLI functions with app
+    from . import db
+    db.init_app(app)
 
     # ensure the instance folder exists
     try:
