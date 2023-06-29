@@ -1,4 +1,5 @@
 # Import dependencies
+from . import main_bp
 import functools
 import os
 from flask import (
@@ -9,11 +10,7 @@ from stockjockey.auth import login_required
 from stockjockey.db import get_db, init_db, query_db
 
 
-# Create blueprint
-bp = Blueprint('main', __name__)
-
-
-@bp.route('/')
+@main_bp.route('/')
 @login_required
 def dashboard():
     posts = query_db(
@@ -22,7 +19,7 @@ def dashboard():
     return render_template('main/dashboard.html', posts=posts)
 
 
-@bp.route('/create', methods=('GET', 'POST'))
+@main_bp.route('/create', methods=('GET', 'POST'))
 @login_required
 def create():
     if request.method == 'POST':
@@ -61,7 +58,7 @@ def get_post(id, check_author=True):
     return post
 
 
-@bp.route('/<int:id>/delete', methods=('POST',))
+@main_bp.route('/<int:id>/delete', methods=('POST',))
 @login_required
 def delete(id):
     get_post(id)
