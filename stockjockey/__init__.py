@@ -30,8 +30,8 @@ def create_app(test_config=None):
         pass  # add an error or warning here
 
     # Register blueprints
-    from . import auth
-    app.register_blueprint(auth.bp)
+    from .auth import auth_bp
+    app.register_blueprint(auth_bp)
 
     from .main import main_bp
     app.register_blueprint(main_bp)
