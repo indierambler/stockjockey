@@ -4,43 +4,60 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 
-# App Factory
+### App Factory ###
 def create_app(test_config=None):
-    # create the app
+    ## Create the App ##
     app = Flask(__name__, instance_relative_config=True)
 
+    ## Configure the App ##
     # load default and public config corresponding to current deployment env
     if os.getenv('DEPLOYMENT'):
         config_str = f"config.Config{os.getenv('DEPLOYMENT').capitalize()}"
     else:
         config_str = "config.Config"
     app.config.from_object(config_str)
-
     # load private config values from env
     # app.config.from_envvar('PRIVATE_CONFIG', default='')
 
-    # register CLI functions with app
+    ## Register CLI Functions With App ##
     from . import db
     db.init_app(app)
 
-    # ensure the instance folder exists
+    ## Ensure Instance Folder Exists ## (possibly remove?)
     try:
         os.makedirs(app.instance_path)
     except OSError:
         pass  # add an error or warning here
 
-    # Register blueprints
-    from .auth import auth_bp
-    app.register_blueprint(auth_bp)
+    ## Register Blueprints ##
+    register_blueprints(app)
 
-    from .main import main_bp
-    app.register_blueprint(main_bp)
-    app.add_url_rule('/', endpoint='dashboard')  # forward root page to dashboard
-
-    # create db
+    ## Create or Initialize DB ## (possibly remove to support lazy connection?)
     db = SQLAlchemy(app)
     # db.init_app(app)
     with app.app_context():
         db.create_all()
 
     return app
+
+
+### Helper Functions ###
+def register_blueprints(app):
+    from .auth import auth_bp
+    app.register_blueprint(auth_bp)
+
+    from .main import main_bp
+    app.register_blueprint(main_bp)
+    app.add_url_rule('/', endpoint='dashboard')  # forward root page to dashboard
+    
+
+def initialize_extensions(app):
+    pass
+
+
+def register_error_handlers(app):
+    pass
+
+
+def configure_logging(app):
+    pass
