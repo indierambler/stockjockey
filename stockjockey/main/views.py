@@ -10,9 +10,34 @@ from stockjockey.auth import login_required
 from stockjockey.db import get_db, init_db, query_db
 
 
-@main_bp.route('/')
+@main_bp.route('/', methods=('GET', 'POST'))
 @login_required
 def dashboard():
+    if request.method == 'POST':
+        # process ticker input
+        ticker = request.form['ticker']
+        error = None
+        if not ticker:
+            error = 'Ticker is required.'
+            flash(error)
+        else:
+            if request.form['submit'] == 'Search':
+                # "search" button - open the ticker snapshot page
+                return redirect(url_for('main.stocksnap.snapshot', ticker=ticker))
+            elif request.form['submit'] == 'Add':
+                # "add" button - add the ticker to watchlist
+                query_db(
+                    f"INSERT INTO asset (ticker)"
+                    f" VALUES ('{ticker}')"
+                )
+            elif request.form['submit'] == 'Remove':
+                # "remove" button - remove the ticker from watchlist
+                query_db(
+                    f"DELETE FROM asset"
+                    f" WHERE ticker = '{ticker}'"
+                )
+
+    # get all watchlist items
     posts = query_db(
         'SELECT * FROM asset'
     )
