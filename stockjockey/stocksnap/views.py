@@ -1,5 +1,5 @@
 # Import dependencies
-from . import main_bp
+from . import stocksnap_bp
 import functools
 import os
 from flask import (
@@ -10,9 +10,10 @@ from stockjockey.auth import login_required
 from stockjockey.db import get_db, init_db, query_db
 
 
-@main_bp.route('/', methods=('GET', 'POST'))
+@stocksnap_bp.route('/stock/<ticker>', methods=('GET', 'POST'))
 @login_required
-def dashboard():
+def snapshot(ticker=None):
+    # Search form
     if request.method == 'POST':
         # process ticker input
         ticker = request.form['ticker']
@@ -36,17 +37,25 @@ def dashboard():
                     f"DELETE FROM asset"
                     f" WHERE ticker = '{ticker}'"
                 )
+    
+    # Update watchlist form
+    
+    # process ticker input
+    if ticker:
+        # load stock template
+        pass
+    else:
+        # load not found template
+        pass
 
-    # get all watchlist items
-    posts = query_db(
-        'SELECT * FROM asset'
-    )
-    return render_template('main/dashboard.html', posts=posts)
+
+    
+    return render_template('stocksnap/snapshot.html', ticker=ticker)
 
 
-@main_bp.route('/create', methods=('GET', 'POST'))
+@stocksnap_bp.route('/search', methods=('GET', 'POST'))
 @login_required
-def create():
+def search():
     if request.method == 'POST':
         ticker = request.form['ticker']
         error = None
@@ -63,7 +72,7 @@ def create():
             )
             return redirect(url_for('main.dashboard'))
 
-    return render_template('main/create.html')
+    return render_template('stocksnap/search.html')
 
 
 def get_post(id, check_author=True):
@@ -83,7 +92,7 @@ def get_post(id, check_author=True):
     return post
 
 
-@main_bp.route('/<int:id>/delete', methods=('POST',))
+@stocksnap_bp.route('/<int:id>/delete', methods=('POST',))
 @login_required
 def delete(id):
     get_post(id)
