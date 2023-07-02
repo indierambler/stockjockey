@@ -7,7 +7,7 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 from stockjockey.auth import login_required
-from stockjockey.db import get_db, init_db, query_db
+from stockjockey.api import get_db, init_db, query_db
 
 
 @main_bp.route('/', methods=('GET', 'POST'))

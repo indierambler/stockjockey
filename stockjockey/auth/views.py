@@ -6,7 +6,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-from stockjockey.db import get_db, init_db, query_db
+from stockjockey.api import get_db, init_db, query_db
 
 
 @auth_bp.route('/register', methods=('GET', 'POST'))
