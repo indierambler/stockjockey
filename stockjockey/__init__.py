@@ -20,8 +20,8 @@ def create_app(test_config=None):
     # app.config.from_envvar('PRIVATE_CONFIG', default='')
 
     ## Register CLI Functions With App ##
-    from . import db
-    db.init_app(app)
+    from . import api
+    api.init_app(app)
 
     ## Ensure Instance Folder Exists ## (possibly remove?)
     try:
@@ -33,10 +33,8 @@ def create_app(test_config=None):
     register_blueprints(app)
 
     ## Create or Initialize DB ## (possibly remove to support lazy connection?)
-    db = SQLAlchemy(app)
-    # db.init_app(app)
-    with app.app_context():
-        db.create_all()
+    from stockjockey.api import db
+    db.init_app(app)
 
     return app
 
