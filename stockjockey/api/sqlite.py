@@ -1,7 +1,10 @@
 """"""
 
 # Import dependencies
-import sqlite3, os, logging, datetime
+import os
+import sqlite3
+import logging
+import datetime
 from flask import current_app, g
 
 
@@ -16,8 +19,8 @@ class DbInterface:
         self.open()
 
         # initialize error logging (TODO: replace error prints with logging)
-        #self.logger = logger or logging.getLogger(__name__)
-        #self.logger.debug('Running __init__')
+        # self.logger = logger or logging.getLogger(__name__)
+        # self.logger.debug('Running __init__')
 
     def open(self):
         # check that the db file exist and works
@@ -67,7 +70,7 @@ class DbInterface:
             c = self.conn.cursor()
             c.execute(query, args)
             rows = c.fetchall()
-            return 0, rows;
+            return 0, rows
         except AssertionError:
             print('ERROR: inconsistent query arguments.')
         except sqlite3.Error as e:
@@ -103,7 +106,8 @@ class User:
         query = (f"SELECT {','.join(cols)} FROM user WHERE username = ?;")
         vals = (self.username)
         status, result = self.db.read(query, vals)
-        if status < 0: return 'Failed to retrieve user'  # TODO: use logging and error
+        if status < 0:
+            return 'Failed to retrieve user'  # TODO: use logging and error
         if result:
             result = dict(result[0])
             for key, val in result.items():
@@ -152,8 +156,9 @@ class StockJockey:
         query = ("SELECT * FROM resource WHERE name = ?;")
         vals = (api)
         status, result = self.interface.read(query, vals)
-        if status < 0: return 'E1'
-        
+        if status < 0:
+            return 'E1'
+
         now = datetime.datetime.now()
         cols = ['id', 'name', 'count', 'maximum', 'created', 'updated', 'deleted']
         if result:  # if api entry found, turn result into resource dict
@@ -162,7 +167,8 @@ class StockJockey:
                 query = ("UPDATE resource SET maximum = ? WHERE name = ?;")
                 vals = (limit, api)
                 status = self.interface.write(query, *vals)
-                if status < 0: return 'E2'
+                if status < 0:
+                    return 'E2'
                 resource['maximum'] = limit
 
             updated = datetime.datetime.strptime(resource['updated'], '%Y-%m-%d %H:%M:%S.%f')
@@ -170,14 +176,16 @@ class StockJockey:
                 query = ("UPDATE resource SET count = count + ?, updated = ? WHERE name = ?;")
                 vals = (counts, now, api)
                 status = self.interface.write(query, *vals)
-                if status < 0: return 'E3'
+                if status < 0:
+                    return 'E3'
                 resource['count'] += counts
                 resource['updated'] = now
             else:  # if updated is not today then reset count
                 query = ("UPDATE resource SET count = ?, updated = ? WHERE name = ?;")
                 vals = (counts, now, api)
                 status = self.interface.write(query, *vals)
-                if status < 0: return 'E4'
+                if status < 0:
+                    return 'E4'
                 resource['count'] = counts
                 resource['updated'] = now
 
@@ -185,15 +193,15 @@ class StockJockey:
             result = [api, counts, limit, now, now]
             resource = dict(zip(cols[1:-2], result))
             query = ("INSERT INTO resource(name, count, maximum, created, updated) "
-                    "VALUES(?, ?, ?, ?, ?);")
+                     "VALUES(?, ?, ?, ?, ?);")
             vals = tuple(result[1:-2])
             status = self.interface.write(query, *vals)
-            if status < 0: return 'E5'
+            if status < 0:
+                return 'E5'
 
         return resource
 
-    #def get_n12(self, ticker, period=datetime.datetime.now()):
-        
+    # def get_n12(self, ticker, period=datetime.datetime.now()):
 
 
 def test(path):
@@ -201,7 +209,7 @@ def test(path):
     - needs to be updated for the actual DB
     - should be moved to a separate test directory
     """
-    db = Interface(path)
+    db = DbInterface(path)  # where is Interface from?
     res = db.open()
     q = """
         CREATE TABLE IF NOT EXISTS example(
@@ -227,3 +235,4 @@ def test(path):
     q = 'SELECT * FROM example WHERE sometext = ?;'
     res, data = db.read(q)
     res = db.close()
+    return res

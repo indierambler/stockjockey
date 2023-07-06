@@ -6,7 +6,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
 )
 from werkzeug.exceptions import abort
-from stockjockey.auth import login_required
+from stockjockey.auth.views import login_required
 from stockjockey.api import get_db, init_db, query_db
 
 
@@ -87,5 +87,5 @@ def get_post(id, check_author=True):
 @login_required
 def delete(id):
     get_post(id)
-    db = query_db('DELETE FROM post WHERE id = ?', (id,))
+    query_db('DELETE FROM post WHERE id = ?', (id,))
     return redirect(url_for('main.dashboard'))

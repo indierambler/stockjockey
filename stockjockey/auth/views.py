@@ -26,10 +26,10 @@ def register():
         if error is None:
             try:
                 query_db(
-                        f"""INSERT INTO user_meta (email, username, password) VALUES
-                        ('{email}', '{username}', '{generate_password_hash(password)}')"""
-                    )
-            except g.db.IntegrityError:
+                    f"""INSERT INTO user_meta (email, username, password) VALUES
+                    ('{email}', '{username}', '{generate_password_hash(password)}')"""
+                )
+            except db.IntegrityError:
                 error = f"User {email} is already registered."
             else:
                 return redirect(url_for("auth.login"))
@@ -45,12 +45,12 @@ def login():
         email = request.form['email']
         # username = email  # maybe change to everything before the @ in the email?
         password = request.form['password']
-        db = get_db()
+        get_db()
         error = None
-        
+
         user = query_db(
-                f"SELECT * FROM user_meta WHERE email = '{email}'"
-            )[0]
+            f"SELECT * FROM user_meta WHERE email = '{email}'"
+        )[0]
 
         if email is None:
             error = 'Incorrect email.'
@@ -75,8 +75,8 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = query_db(
-                f'SELECT * FROM user_meta WHERE id = {user_id}'
-            )[0]
+            f'SELECT * FROM user_meta WHERE id = {user_id}'
+        )[0]
 
 
 @auth_bp.route('/logout')

@@ -35,19 +35,17 @@ def query_db(sql=None):
     db = get_db()
     with db.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
         cursor.execute(sql)
-        try:
-            results = cursor.fetchall()
-        except:
-            results = None
+        results = cursor.fetchall()
+
     db.commit()
-    #db.close()
+    # db.close()
     return results
 
 
 def init_db():
     # TODO: connect to database server/container
     # TODO: create database if not exist
-    
+
     # build base schema in database (postgres)
     with current_app.open_resource('schema.sql') as f:
         query_db(f.read().decode('utf8'))

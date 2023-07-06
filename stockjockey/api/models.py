@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
 from sqlalchemy.orm import relationship
-from flask_appbuilder import Model
+from . import db
 from .service import HasPassword
 
 
-class User(HasPassword,db.Model):
+class User(HasPassword, db.Model):
     """user table definition
     - inherits a password column attribute
     - inherits a password validation method
@@ -22,18 +22,18 @@ class User(HasPassword,db.Model):
         return '<User %r>' % self.username
 
 
-class ContactGroup(Model):
+class ContactGroup(db.Model):
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique = True, nullable=False)
+    name = Column(String(50), unique=True, nullable=False)
 
     def __repr__(self):
         return self.name
 
 
-class Contact(Model):
+class Contact(db.Model):
     id = Column(Integer, primary_key=True)
-    name =  Column(String(150), unique = True, nullable=False)
-    address =  Column(String(564), default='Street ')
+    name = Column(String(150), unique=True, nullable=False)
+    address = Column(String(564), default='Street ')
     birthday = Column(Date)
     personal_phone = Column(String(20))
     personal_cellphone = Column(String(20))
