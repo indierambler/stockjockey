@@ -35,7 +35,10 @@ def query_db(sql=None):
     db = get_db()
     with db.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
         cursor.execute(sql)
-        results = cursor.fetchall()
+        try:
+            results = cursor.fetchall()
+        except psycopg2.ProgrammingError:
+            results = None
 
     db.commit()
     # db.close()
