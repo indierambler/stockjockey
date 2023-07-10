@@ -15,11 +15,10 @@ from stockjockey.api import get_db, init_db, query_db
 def dashboard():
     if request.method == 'POST':
         # process ticker input
-        ticker = request.form['ticker']
-        error = None
+        ticker = request.form['ticker'].upper()
         if not ticker:
-            error = 'Ticker is required.'
-            flash(error)
+            flash('Ticker is required.')
+            return redirect(url_for('main.dashboard'))
         else:
             if request.form['submit'] == 'Search':
                 # "search" button - open the ticker snapshot page

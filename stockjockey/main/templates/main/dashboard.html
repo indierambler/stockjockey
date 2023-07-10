@@ -10,7 +10,7 @@
 {% block content %}
   <!--SEARCH BAR-->
   <form method="post">
-    <input name="ticker" id="ticker" value="{{ request.form['ticker'] }}" required>
+    <input name="ticker" id="ticker" value="{{ request.form['ticker'] }}">
     <input type="submit" name="submit" value="Search">
     <input type="submit" name="submit" value="Add">
     <input type="submit" name="submit" value="Remove">

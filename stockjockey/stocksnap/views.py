@@ -15,28 +15,29 @@ from stockjockey.api import get_db, init_db, query_db
 def snapshot(ticker=None):
     # Search form
     if request.method == 'POST':
-        # process ticker input
-        ticker = request.form['ticker']
-        error = None
-        if not ticker:
-            error = 'Ticker is required.'
-            flash(error)
-        else:
-            if request.form['submit'] == 'Search':
-                # "search" button - open the ticker snapshot page
+        if request.form['submit'] == 'Search':
+            # "search" button - open the ticker snapshot page
+            if request.form['ticker']:
+                ticker = request.form['ticker'].upper()  # get ticker input
+            else:
+                flash('Ticker is required.')
                 return redirect(url_for('main.stocksnap.snapshot', ticker=ticker))
-            elif request.form['submit'] == 'Add':
-                # "add" button - add the ticker to watchlist
-                query_db(
-                    f"INSERT INTO asset (ticker)"
-                    f" VALUES ('{ticker}')"
-                )
-            elif request.form['submit'] == 'Remove':
-                # "remove" button - remove the ticker from watchlist
-                query_db(
-                    f"DELETE FROM asset"
-                    f" WHERE ticker = '{ticker}'"
-                )
+        elif request.form['submit'] == 'Add':
+            # "add" button - add the ticker to watchlist
+            query_db(
+                f"INSERT INTO asset (ticker)"
+                f" VALUES ('{ticker}')"
+            )
+            flash(f'{ticker} has been added to watchlist.')
+            return redirect(url_for('main.stocksnap.snapshot', ticker=ticker))
+        elif request.form['submit'] == 'Remove':
+            # "remove" button - remove the ticker from watchlist
+            query_db(
+                f"DELETE FROM asset"
+                f" WHERE ticker = '{ticker}'"
+            )
+            flash(f'{ticker} has been removed from watchlist.')
+            return redirect(url_for('main.stocksnap.snapshot', ticker=ticker))
 
     # Update watchlist form
 
