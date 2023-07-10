@@ -1,23 +1,30 @@
 import bcrypt
-
+from sqlalchemy import Text, TypeDecorator
+from sqlalchemy.orm import validates
+from sqlalchemy.ext.mutable import Mutable
+from .. import db
 
 
 class Password(TypeDecorator):
     """Allows storing and retrieving password hashes using PasswordHash
     - this is the type to be used for each password column
     """
-    impl = Text
+    impl = Text  # where does Text come from?
 
     def __init__(self, rounds=12, **kwds):
         self.rounds = rounds
         super(Password, self).__init__(**kwds)
 
     def process_bind_param(self, value, dialect):
-        """Ensure the value is a PasswordHash and then return its hash."""
+        """Ensure the value is a PasswordHash and then return its hash.
+        - converts PasswordHash object to a value suitable for the implementor type
+        """
         return self._convert(value).hash
 
     def process_result_value(self, value, dialect):
-        """Convert the hash to a PasswordHash, if it's non-NULL."""
+        """Convert the hash to a PasswordHash, if it's non-NULL.
+        - converts the value from the db to PasswordHash for use in the python runtime
+        """
         if value is not None:
             return PasswordHash(value, rounds=self.rounds)
 
@@ -34,7 +41,7 @@ class Password(TypeDecorator):
         """
         if isinstance(value, PasswordHash):
             return value
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             return PasswordHash.new(value, self.rounds)
         elif value is not None:
             raise TypeError(
@@ -58,9 +65,8 @@ class PasswordHash(Mutable):
         re-hashed with the desired number of rounds and updated with the results.
         This will also mark the object as having changed (and thus need updating).
         """
-        if isinstance(candidate, basestring):
-            if isinstance(candidate, unicode):
-                candidate = candidate.encode('utf8')
+        if isinstance(candidate, str):
+            candidate = candidate.encode('utf8')
             if self.hash == bcrypt.hashpw(candidate, self.hash):
                 if self.rounds < self.desired_rounds:
                     self._rehash(candidate)
@@ -81,8 +87,7 @@ class PasswordHash(Mutable):
     @classmethod
     def new(cls, password, rounds):
         """Returns a new PasswordHash object for the given password and rounds."""
-        if isinstance(password, unicode):
-            password = password.encode('utf8')
+        password = password.encode('utf8')
         return cls(cls._new(password, rounds))
 
     @staticmethod
@@ -106,7 +111,7 @@ class HasPassword(object):
             id = db.Column(Integer, primary_key=True)
             name = db.Column(Text)
     """
-    password = Column(Password)
+    password = db.Column(Password)
 
     @validates('password')
     def _validate_password(self, key, password):
