@@ -4,3 +4,4 @@ or interact with other services or the db layer.
 """
 
 from .hash import Password, PasswordHash, HasPassword
+from .util import get_db, update_db_command, reset_db_command, register_commands

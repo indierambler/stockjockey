@@ -21,7 +21,8 @@ def create_app(test_config=None):
 
     # Register CLI Functions With App #
     from . import api
-    api.init_app(app)
+    api.init_app(app)  # commands for legacy psycopg or sqlite
+    api.service.register_commands(app)  # commands for sqlalchemy 
 
     # Ensure Instance Folder Exists # (possibly remove?)
     try:
