@@ -23,8 +23,8 @@ def pg_utcnow(element, compiler, **kw):
 
 class User(HasPassword, db.Model):
     """user table definition
-    - inherits a password column attribute
-    - inherits a password validation method
+    - inherits a password column attribute (password)
+    - inherits a password validation method (_validate_password(key, password))
     """
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = db.Column(db.String(80), unique=True, nullable=False)
