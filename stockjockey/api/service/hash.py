@@ -9,14 +9,14 @@ class Password(TypeDecorator):
     """Allows storing and retrieving password hashes using PasswordHash
     - this is the type to be used for each password column
     """
-    impl = Text  # where does Text come from?
+    impl = Text
 
     def __init__(self, rounds=12, **kwds):
         self.rounds = rounds
-        super(Password, self).__init__(**kwds)
+        super().__init__(**kwds)  # run inits on inherited classes
 
     def process_bind_param(self, value, dialect):
-        """Ensure the value is a PasswordHash and then return its hash.
+        """Ensure the value is a PasswordHash and then return its hash as string.
         - converts PasswordHash object to a value suitable for the implementor type
         """
         return self._convert(value).hash
@@ -50,9 +50,13 @@ class Password(TypeDecorator):
 
 class PasswordHash(Mutable):
     """Define a hash scheme for a password
+    - self.hash_ is the decoded bcrypt hash of the password
+    - self.hash is the string representation of the password hash (to be saved in db)
+    - the "new" method is to create a bcrypt hash from a plaintext password string
+    - a new instance of PasswordHash creates a proper object from an existing hash string
     """
     def __init__(self, hash_, rounds=None):
-        assert len(hash_) == 60, 'bcrypt hash should be 60 chars.'
+        assert len(hash_) == 60, f'bcrypt hash with length:{len(hash_)} should be 60 chars.'
         assert hash_.count('$'), 'bcrypt hash should have 3x "$".'
         self.hash = str(hash_)
         self.rounds = int(self.hash.split('$')[2])
@@ -65,9 +69,10 @@ class PasswordHash(Mutable):
         re-hashed with the desired number of rounds and updated with the results.
         This will also mark the object as having changed (and thus need updating).
         """
+        self.hash_ = self.hash.encode('UTF-8')
         if isinstance(candidate, str):
-            candidate = candidate.encode('utf8')
-            if self.hash == bcrypt.hashpw(candidate, self.hash):
+            candidate = candidate.encode('UTF-8')
+            if self.hash_ == bcrypt.hashpw(candidate, self.hash_):
                 if self.rounds < self.desired_rounds:
                     self._rehash(candidate)
                 return True
@@ -86,14 +91,14 @@ class PasswordHash(Mutable):
 
     @classmethod
     def new(cls, password, rounds):
-        """Returns a new PasswordHash object for the given password and rounds."""
-        password = password.encode('utf8')
+        """Returns a new PasswordHash object for the given password string and rounds."""
+        password = password.encode('UTF-8')
         return cls(cls._new(password, rounds))
 
     @staticmethod
     def _new(password, rounds):
         """Returns a new bcrypt hash for the given password and rounds."""
-        return bcrypt.hashpw(password, bcrypt.gensalt(rounds))
+        return bcrypt.hashpw(password, bcrypt.gensalt(rounds)).decode('UTF-8')
 
     def _rehash(self, password):
         """Recreates the internal hash and marks the object as changed."""
