@@ -3,7 +3,7 @@
 {% block header %}
   <h1>{% block title %}{{ ticker }} Snapshot{% endblock %}</h1>
   {% if g.user %}
-    <a class="action" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    <a class="action" href="{{ url_for('main.dashboard', user_id=session.get('user_id')) }}">Dashboard</a>
   {% endif %}
 {% endblock %}
 

@@ -47,7 +47,7 @@ def register_blueprints(app):
 
     from .main import main_bp
     app.register_blueprint(main_bp)
-    app.add_url_rule('/', endpoint='dashboard')  # forward root page to dashboard
+    app.add_url_rule('/', endpoint='home')  # forward root page to dashboard
 
 
 def initialize_extensions(app):

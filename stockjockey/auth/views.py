@@ -55,7 +55,7 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user.id
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('main.dashboard', user_id=session['user_id']))
 
         flash(error)
         return redirect(url_for('auth.login'))

@@ -6,19 +6,30 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
 )
 from werkzeug.exceptions import abort
+from sqlalchemy import insert
 from stockjockey.auth.views import login_required
 from stockjockey.api import get_db, init_db, query_db
 
 
-@main_bp.route('/', methods=('GET', 'POST'))
+@main_bp.route('/')
+def home():
+    if session.get('user_id', None):
+        user_id = session.get('user_id')
+        return redirect(url_for('main.dashboard', user_id=session.get('user_id')))
+    else:
+        return redirect(url_for('auth.login'))
+
+
+# @main_bp.route('/', methods=('GET', 'POST'), defaults={'user_id': None})
+@main_bp.route('/<uuid:user_id>/dashboard', methods=('GET', 'POST'))
 @login_required
-def dashboard():
+def dashboard(user_id):
     if request.method == 'POST':
         # process ticker input
         ticker = request.form['ticker'].upper()
         if not ticker:
             flash('Ticker is required.')
-            return redirect(url_for('main.dashboard'))
+            return redirect(url_for('main.dashboard', user_id=user_id))
         else:
             if request.form['submit'] == 'Search':
                 # "search" button - open the ticker snapshot page
@@ -40,7 +51,7 @@ def dashboard():
     posts = query_db(
         'SELECT * FROM asset'
     )
-    return render_template('main/dashboard.html', posts=posts)
+    return render_template('main/dashboard.html', user_id=user_id, posts=posts)
 
 
 @main_bp.route('/create', methods=('GET', 'POST'))

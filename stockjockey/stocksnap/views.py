@@ -69,7 +69,7 @@ def search():
                 f"INSERT INTO asset (ticker)"
                 f" VALUES ('{ticker}')"
             )
-            return redirect(url_for('main.dashboard'))
+            return redirect(url_for('main.dashboard', user_id=session.get('user_id')))
 
     return render_template('stocksnap/search.html')
 
