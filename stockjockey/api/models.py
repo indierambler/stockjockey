@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, Date
 from sqlalchemy.types import DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func, expression
@@ -37,6 +37,7 @@ class User(HasPassword, db.Model):
     created = db.Column(DateTime, server_default=utcnow())
     updated = db.Column(DateTime, onupdate=utcnow())
     deleted = db.Column(DateTime)
+    user_asset_relation = relationship('UserAssetRelation')
     user_insight = relationship('UserInsight')
 
     def __repr__(self):
@@ -72,6 +73,55 @@ class Asset(db.Model):
     created = db.Column(DateTime, server_default=utcnow())
     updated = db.Column(DateTime, onupdate=utcnow())
     deleted = db.Column(DateTime)
+    user_asset_relation = relationship('UserAssetRelation')
+    asset_metric = relationship('AssetMetric')
+    asset_meta = relationship('AssetMeta')
 
     def __repr__(self):
         return '<Asset %r>' % self.ticker
+
+
+class AssetMetric(db.Model):
+    """asset_metric table definition
+    """
+    asset_id = db.Column(UUID(as_uuid=True), ForeignKey('asset.id'), primary_key=True)
+    metric = db.Column(db.String(20), nullable=False)
+    year = db.Column(Integer, nullable=False)
+    quarter = db.Column(Integer)
+    value = db.Column(Float, nullable=False)
+    created = db.Column(DateTime, server_default=utcnow())
+    updated = db.Column(DateTime, onupdate=utcnow())
+    deleted = db.Column(DateTime)
+
+    def __repr__(self):
+        return f'Asset Metric (Asset:{self.asset_id}, Metric:{self.metric}, Year:{self.year}, Value:{self.value})'
+
+
+class AssetMeta(db.Model):
+    """asset_meta table definition
+    """
+    asset_id = db.Column(UUID(as_uuid=True), ForeignKey('asset.id'), primary_key=True)
+    exchange = db.Column(db.String(20), nullable=False)
+    sector = db.Column(db.String(80), nullable=False)
+    created = db.Column(DateTime, server_default=utcnow())
+    updated = db.Column(DateTime, onupdate=utcnow())
+    deleted = db.Column(DateTime)
+
+    def __repr__(self):
+        return f'Asset Meta (Asset:{self.asset_id})'
+
+
+class UserAssetRelation(db.Model):
+    """user_asset_relation table definition
+    - TODO: make combination of user and asset ids unique
+    - TODO: add a relation id column?
+    """
+    id = db.Column(Integer, primary_key=True)
+    user_id = db.Column(UUID(as_uuid=True), ForeignKey('user.id'))
+    asset_id = db.Column(UUID(as_uuid=True), ForeignKey('asset.id'))
+    created = db.Column(DateTime, server_default=utcnow())
+    updated = db.Column(DateTime, onupdate=utcnow())
+    deleted = db.Column(DateTime)
+
+    def __repr__(self):
+        return f'User Asset Relation (User:{self.user_id}, Asset:{self.asset_id})'
