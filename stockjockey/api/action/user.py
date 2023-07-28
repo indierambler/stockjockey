@@ -1,7 +1,6 @@
 from . import get_db
 from . import utcnow
 from . import User
-# from ..service.util import get_db
 
 
 def get(*args, **kwargs):
