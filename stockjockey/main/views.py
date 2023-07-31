@@ -8,8 +8,7 @@ from flask import (
 from werkzeug.exceptions import abort
 from sqlalchemy import insert
 from stockjockey.auth.views import login_required
-from stockjockey.api import get_db, query_db, action
-from stockjockey.api.service.util import get_db
+from stockjockey.api import action
 
 
 @main_bp.route('/')
@@ -62,10 +61,9 @@ def user_profile():
         if error is not None:
             flash(error)
         else:
-            query_db(
-                f"INSERT INTO asset (ticker)"
-                f" VALUES ('{ticker}')"
-            )
+            action.asset.add(ticker=ticker)
+            action.user_asset_relation.add(user_id=session.get('user_id'), ticker=ticker)
+            action.commit()
             return redirect(url_for('main.dashboard'))
 
     return render_template('main/create.html')
