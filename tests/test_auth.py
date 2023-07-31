@@ -1,0 +1,1 @@
+"""Functional and unit tests for the auth blueprint"""
