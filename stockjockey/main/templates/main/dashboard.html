@@ -3,14 +3,14 @@
 {% block header %}
   <h1>{% block title %}Dashboard{% endblock %}</h1>
   {% if g.user %}
-    <a class="action" href="{{ url_for('main.create') }}">New</a>
+    <a class="action" href="{{ url_for('main.user_profile') }}">Profile</a>
   {% endif %}
 {% endblock %}
 
 {% block content %}
   <!--SEARCH BAR-->
   <form method="post">
-    <input name="ticker" id="ticker" value="{{ request.form['ticker'] }}" required>
+    <input name="ticker" id="ticker" value="{{ request.form['ticker'] }}">
     <input type="submit" name="submit" value="Search">
     <input type="submit" name="submit" value="Add">
     <input type="submit" name="submit" value="Remove">

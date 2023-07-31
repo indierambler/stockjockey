@@ -6,8 +6,8 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
 )
 from werkzeug.exceptions import abort
-from stockjockey.auth import login_required
-from stockjockey.db import get_db, init_db, query_db
+from stockjockey.auth.views import login_required
+from stockjockey.api import action
 
 
 @stocksnap_bp.route('/stock/<ticker>', methods=('GET', 'POST'))
@@ -15,86 +15,40 @@ from stockjockey.db import get_db, init_db, query_db
 def snapshot(ticker=None):
     # Search form
     if request.method == 'POST':
-        # process ticker input
-        ticker = request.form['ticker']
-        error = None
-        if not ticker:
-            error = 'Ticker is required.'
-            flash(error)
-        else:
-            if request.form['submit'] == 'Search':
-                # "search" button - open the ticker snapshot page
+        if request.form['submit'] == 'Search':
+            # "search" button - open the ticker snapshot page
+            if request.form['ticker']:
+                ticker = request.form['ticker'].upper()  # get ticker input
+            else:
+                flash('Ticker is required.')
                 return redirect(url_for('main.stocksnap.snapshot', ticker=ticker))
-            elif request.form['submit'] == 'Add':
-                # "add" button - add the ticker to watchlist
-                query_db(
-                    f"INSERT INTO asset (ticker)"
-                    f" VALUES ('{ticker}')"
-                )
-            elif request.form['submit'] == 'Remove':
-                # "remove" button - remove the ticker from watchlist
-                query_db(
-                    f"DELETE FROM asset"
-                    f" WHERE ticker = '{ticker}'"
-                )
-    
+        elif request.form['submit'] == 'Add':
+            # "add" button - add the ticker to watchlist
+            action.asset.add(ticker=ticker)
+            action.user_asset_relation.add(user_id=session.get('user_id'), ticker=ticker)
+            action.commit()
+            flash(f'{ticker} has been added to watchlist.')
+            return redirect(url_for('main.stocksnap.snapshot', ticker=ticker))
+        elif request.form['submit'] == 'Remove':
+            # "remove" button - remove the ticker from watchlist
+            action.user_asset_relation.remove(user_id=session.get('user_id'), ticker=ticker)
+            action.commit()
+            flash(f'{ticker} has been removed from watchlist.')
+            return redirect(url_for('main.stocksnap.snapshot', ticker=ticker))
+
     # Update watchlist form
-    
+
     # process ticker input
     if ticker:
-        # load stock template
+        # get ticker row from asset table (if exists)
+        # if not - get ticker data from the aether and put in asset table
+        # get corresponding row from asset_meta table (if exists)
+        # if not - get metadata from the aether and put in asset_meta table
+        # get all rows from asset_metric table to complete nasdaq12 analysis
+        # get any missing data for nasdaq12 from the aether and add to asset_metric table
         pass
     else:
-        # load not found template
+        # flash ticker not valid message
         pass
 
-
-    
     return render_template('stocksnap/snapshot.html', ticker=ticker)
-
-
-@stocksnap_bp.route('/search', methods=('GET', 'POST'))
-@login_required
-def search():
-    if request.method == 'POST':
-        ticker = request.form['ticker']
-        error = None
-
-        if not ticker:
-            error = 'Ticker is required.'
-
-        if error is not None:
-            flash(error)
-        else:
-            query_db(
-                f"INSERT INTO asset (ticker)"
-                f" VALUES ('{ticker}')"
-            )
-            return redirect(url_for('main.dashboard'))
-
-    return render_template('stocksnap/search.html')
-
-
-def get_post(id, check_author=True):
-    post = query_db(
-        'SELECT p.id, name, ticker'
-        ' FROM post p'
-        ' WHERE p.id = ?',
-        (id,)
-    )[0]
-
-    if post is None:
-        abort(404, f"Post id {id} doesn't exist.")
-
-    if check_author and post['author_id'] != g.user['id']:
-        abort(403)
-
-    return post
-
-
-@stocksnap_bp.route('/<int:id>/delete', methods=('POST',))
-@login_required
-def delete(id):
-    get_post(id)
-    db = query_db('DELETE FROM post WHERE id = ?', (id,))
-    return redirect(url_for('main.dashboard'))

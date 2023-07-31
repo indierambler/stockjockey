@@ -28,7 +28,8 @@ def close_db(e=None):
     db = g.pop('db', None)
 
     if db is not None:
-        db.close()
+        # db.close()
+        pass
 
 
 def query_db(sql=None):
@@ -37,17 +38,18 @@ def query_db(sql=None):
         cursor.execute(sql)
         try:
             results = cursor.fetchall()
-        except:
+        except psycopg2.ProgrammingError:
             results = None
+
     db.commit()
-    #db.close()
+    # db.close()
     return results
 
 
 def init_db():
     # TODO: connect to database server/container
     # TODO: create database if not exist
-    
+
     # build base schema in database (postgres)
     with current_app.open_resource('schema.sql') as f:
         query_db(f.read().decode('utf8'))

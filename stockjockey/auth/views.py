@@ -5,8 +5,8 @@ import os
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
 )
-from werkzeug.security import check_password_hash, generate_password_hash
-from stockjockey.db import get_db, init_db, query_db
+from stockjockey.api import query_db, action
+from stockjockey.api.service.util import get_db
 
 
 @auth_bp.route('/register', methods=('GET', 'POST'))
@@ -15,9 +15,8 @@ def register():
         email = request.form['email']
         username = email  # maybe change to everything before the @ in the email?
         password = request.form['password']
-        db = get_db()
+        get_db()
         error = None
-
         if not email:
             error = 'Email is required.'
         elif not password:
@@ -25,16 +24,15 @@ def register():
 
         if error is None:
             try:
-                query_db(
-                        f"""INSERT INTO user_meta (email, username, password) VALUES
-                        ('{email}', '{username}', '{generate_password_hash(password)}')"""
-                    )
-            except g.db.IntegrityError:
+                action.user.add(email=email, username=username, password=password)
+                action.commit()
+            except g.db.exc.IntegrityError:
                 error = f"User {email} is already registered."
             else:
                 return redirect(url_for("auth.login"))
 
         flash(error)
+        return redirect(url_for('auth.register'))
 
     return render_template('auth/register.html')
 
@@ -43,26 +41,24 @@ def register():
 def login():
     if request.method == 'POST':
         email = request.form['email']
-        # username = email  # maybe change to everything before the @ in the email?
         password = request.form['password']
-        db = get_db()
-        error = None
-        
-        user = query_db(
-                f"SELECT * FROM user_meta WHERE email = '{email}'"
-            )[0]
 
-        if email is None:
-            error = 'Incorrect email.'
-        elif not check_password_hash(user['password'], password):
-            error = 'Incorrect password.'
+        get_db()
+        error = None
+        if not email:
+            error = 'Email is required.'
+        else:
+            user = action.user.get(email=email)  # TODO: try and except this?
+            if not user.password == password:
+                error = 'Password is incorrect.'
 
         if error is None:
             session.clear()
-            session['user_id'] = user['id']
-            return redirect(url_for('dashboard'))
+            session['user_id'] = user.id
+            return redirect(url_for('main.dashboard', user_id=session['user_id']))
 
         flash(error)
+        return redirect(url_for('auth.login'))
 
     return render_template('auth/login.html')
 
@@ -74,9 +70,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = query_db(
-                f'SELECT * FROM user_meta WHERE id = {user_id}'
-            )[0]
+        g.user = action.user.get(id=user_id)
 
 
 @auth_bp.route('/logout')
