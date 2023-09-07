@@ -1,15 +1,15 @@
 from flask.cli import FlaskGroup
+from stockjockey import create_app, api  # , User
 
-from stockjockey import create_app  # , db, User
+app = create_app()
+cli = FlaskGroup(app)
 
-# cli = FlaskGroup(app)
 
-
-# @cli.command("create_db")
-# def create_db():
-#    db.drop_all()
-#    db.create_all()
-#    db.session.commit()
+@cli.command("create_db")
+def create_db():
+    api.drop_all()
+    api.create_all()
+    api.session.commit()
 
 
 # @cli.command("seed_db")
