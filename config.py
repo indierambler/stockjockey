@@ -19,9 +19,9 @@ class Config(object):
         url syntax: postgresql://user:password@container:port/dbname
         """
         with open(os.getenv("POSTGRES_USER_FILE"), 'r') as file:
-            user = file.read()
+            user = file.read().replace('\n', '')
         with open(os.getenv("POSTGRES_PASSWORD_FILE"), 'r') as file:
-            password = file.read()
+            password = file.read().replace('\n', '')
         container = os.getenv("DB_CONTAINER")
         port = os.getenv("DB_PORT")
         dbname = os.getenv("POSTGRES_DB")
