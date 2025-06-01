@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, Integer, Float, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, Float, SmallInteger, String, ForeignKey, Date
 from sqlalchemy.types import DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func, expression
@@ -47,7 +47,8 @@ class User(HasPassword, db.Model):
 class UserInsight(db.Model):
     """user_insight table definition
     """
-    user_id = db.Column(UUID(as_uuid=True), ForeignKey('user.id'), primary_key=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = db.Column(UUID(as_uuid=True), ForeignKey('user.id'))
     # session_count = db.Column(db.Integer)
     # asset_query_count = db.Column(db.Integer)
     # created = db.Column(DateTime(timezone=True), server_default=func.now())
@@ -67,6 +68,12 @@ class Asset(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(80))
     ticker = db.Column(db.String(20), unique=True, nullable=False)
+    exchange = db.Column(db.String(20), nullable=True)
+    market = db.Column(db.String(20), nullable=True)
+    industry = db.Column(db.String(20), nullable=True)
+    sector = db.Column(db.String(80), nullable=True)
+    fye_month = db.Column(SmallInteger, nullable=True)
+    description = db.Column(db.String(120), nullable=True)
     # created = db.Column(DateTime(timezone=True), server_default=func.now())
     # updated = db.Column(DateTime(timezone=True), onupdate=func.now())
     # deleted = db.Column()
@@ -84,7 +91,8 @@ class Asset(db.Model):
 class AssetMetric(db.Model):
     """asset_metric table definition
     """
-    asset_id = db.Column(UUID(as_uuid=True), ForeignKey('asset.id'), primary_key=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    asset_id = db.Column(UUID(as_uuid=True), ForeignKey('asset.id'))
     metric = db.Column(db.String(20), nullable=False)
     year = db.Column(Integer, nullable=False)
     quarter = db.Column(Integer)
@@ -97,18 +105,18 @@ class AssetMetric(db.Model):
         return f'Asset Metric (Asset:{self.asset_id}, Metric:{self.metric}, Year:{self.year}, Value:{self.value})'
 
 
-class AssetMeta(db.Model):
-    """asset_meta table definition
-    """
-    asset_id = db.Column(UUID(as_uuid=True), ForeignKey('asset.id'), primary_key=True)
-    exchange = db.Column(db.String(20), nullable=False)
-    sector = db.Column(db.String(80), nullable=False)
-    created = db.Column(DateTime, server_default=utcnow())
-    updated = db.Column(DateTime, onupdate=utcnow())
-    deleted = db.Column(DateTime)
+# class AssetMeta(db.Model):
+#     """asset_meta table definition
+#     """
+#     asset_id = db.Column(UUID(as_uuid=True), ForeignKey('asset.id'), primary_key=True)
+#     exchange = db.Column(db.String(20), nullable=False)
+#     sector = db.Column(db.String(80), nullable=False)
+#     created = db.Column(DateTime, server_default=utcnow())
+#     updated = db.Column(DateTime, onupdate=utcnow())
+#     deleted = db.Column(DateTime)
 
-    def __repr__(self):
-        return f'Asset Meta (Asset:{self.asset_id})'
+#     def __repr__(self):
+#         return f'Asset Meta (Asset:{self.asset_id})'
 
 
 class UserAssetRelation(db.Model):
@@ -116,7 +124,7 @@ class UserAssetRelation(db.Model):
     - TODO: make combination of user and asset ids unique
     - TODO: add a relation id column?
     """
-    id = db.Column(Integer, primary_key=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = db.Column(UUID(as_uuid=True), ForeignKey('user.id'))
     asset_id = db.Column(UUID(as_uuid=True), ForeignKey('asset.id'))
     created = db.Column(DateTime, server_default=utcnow())

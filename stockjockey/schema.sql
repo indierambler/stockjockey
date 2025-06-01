@@ -55,6 +55,12 @@ CREATE TABLE asset (
   id SERIAL PRIMARY KEY,
   name TEXT,
   ticker TEXT UNIQUE NOT NULL,
+  exchange TEXT,
+  market TEXT,
+  industry TEXT,
+  sector TEXT,
+  fye_month SMALLINT,
+  description TEXT,
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   deleted TIMESTAMP DEFAULT NULL
@@ -72,15 +78,16 @@ CREATE TABLE asset_metric (
   FOREIGN KEY (asset_id) REFERENCES asset (id)
 );
 
-CREATE TABLE asset_meta (
-  asset_id INTEGER NOT NULL,
-  exchange TEXT NOT NULL,
-  sector TEXT NOT NULL,
-  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  deleted TIMESTAMP DEFAULT NULL,
-  FOREIGN KEY (asset_id) REFERENCES asset (id)
-);
+-- NOT NEEDED: easily integrated into asset table
+-- CREATE TABLE asset_meta (
+--   asset_id INTEGER NOT NULL,
+--   exchange TEXT NOT NULL,
+--   sector TEXT NOT NULL,
+--   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   deleted TIMESTAMP DEFAULT NULL,
+--   FOREIGN KEY (asset_id) REFERENCES asset (id)
+-- );
 
 CREATE TABLE user_asset_relation (
   user_id INTEGER NOT NULL,
