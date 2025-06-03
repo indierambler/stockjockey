@@ -95,7 +95,7 @@ class AssetMetric(db.Model):
     asset_id = db.Column(UUID(as_uuid=True), ForeignKey('asset.id'))
     metric = db.Column(db.String(20), nullable=False)
     year = db.Column(Integer, nullable=False)
-    quarter = db.Column(Integer)
+    quarter = db.Column(db.String(20))
     value = db.Column(Float, nullable=False)
     created = db.Column(DateTime, server_default=utcnow())
     updated = db.Column(DateTime, onupdate=utcnow())
