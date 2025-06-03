@@ -4,6 +4,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import import_string
 
+from stockjockey.api.service.simfin import SimfinApiHandler
+
 
 # App Factory #
 def create_app(test_config=None):
@@ -33,6 +35,9 @@ def create_app(test_config=None):
 
     # Register Blueprints #
     register_blueprints(app)
+
+    # Initialize global services
+    app.simfin = SimfinApiHandler(os.environ["SIMFIN_KEY"])
 
     # Create or Initialize DB #
     from stockjockey.api import db
