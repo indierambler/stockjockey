@@ -3,6 +3,7 @@ from flask import app
 import requests
 from sqlalchemy import exists, select
 from stockjockey import api
+from stockjockey.api.core import query_db
 from . import BaseCRUD, get_db
 from . import utcnow
 from . import Asset, AssetMetric
@@ -10,33 +11,58 @@ from . import Asset, AssetMetric
 
 class AssetHandler(BaseCRUD):
     def __init__(self):
-        super().__init__(api.models.Asset)
+        super().__init__(Asset)
 
-    def asset_exists(self, ticker: str):
-        stmt = select(
-            exists().where(
-                (Asset.ticker == ticker)
-            )
+    def record_exists(self, ticker: str):
+        table_name = "asset"
+        sql = (
+            f"SELECT EXISTS (SELECT 1 FROM {table_name}"
+            f"WHERE ticker = {ticker});"
         )
-        return session.scalar(stmt)
+        response = query_db(sql)
+        return response
 
-    def assetmetric_exists(self, id: str, metric: str, year: int, quarter: str):
-        stmt = select(
-            exists().where(
-                (AssetMetric.id == id) &
-                (AssetMetric.metric == metric) &
-                (AssetMetric.year == year) &
-                (AssetMetric.quarter == quarter)
-            )
-        )
-        return session.scalar(stmt)
-            
-
-    def add_asset(self, ticker):
-        # check if ticker refers to a real-life asset?
-        
+    def add_record(self, ticker):
+        """Create an asset record"""
         # check if ticker in asset table already
         if self.asset_exists(ticker):
+            return
+
+        # retrieve metadata
+        app.simfin.get_metadata(ticker)
+        metadata = app.simfin.parse_metadata(ticker)
+
+        # insert into asset table
+        return self.create(metadata)
+    
+    def fetch_record(self):
+        """Call from frontend to retrieve record info"""
+        # check if record exists
+        # retrieve record if so
+        # create record if not
+        # return full record
+        pass
+
+    
+
+class AssetMetricHandler(BaseCRUD):
+    def __init__(self):
+        super().__init__(AssetMetric)
+
+    def record_exists(self, id: str, metric: str, year: int, quarter: str):
+        table_name = "asset_metric"
+        sql = (
+            f"SELECT EXISTS (SELECT 1 FROM {table_name}"
+            f"WHERE id = {id});"
+        )
+        response = query_db(sql)
+        return response
+            
+
+    def add_records(self, ticker):
+        """Create records"""
+        # check if ticker in asset table already
+        if self.recird_exists(ticker):
             return
 
         # retrieve metadata

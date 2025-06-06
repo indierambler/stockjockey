@@ -38,7 +38,7 @@ def query_db(sql=None):
         cursor.execute(sql)
         try:
             results = cursor.fetchall()
-        except psycopg2.ProgrammingError:
+        except psycopg2.ProgrammingError as e:
             results = None
 
     db.commit()
