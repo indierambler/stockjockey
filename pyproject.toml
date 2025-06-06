@@ -1,0 +1,27 @@
+[project]
+name = "stockjockey"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "indram", email = "bryanjtimm@gmail.com"},
+]
+dependencies = [
+    "Flask==2.3.2",
+    "Flask-SQLAlchemy==3.0.3",
+    "gunicorn==20.1.0",
+    "bcrypt==4.0.1",
+    "beautifulsoup4>=4.13.4",
+    "requests>=2.32.3",
+]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+packages = [{include = "stockjockey"}]
+distribution = true
