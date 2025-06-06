@@ -41,6 +41,8 @@ def snapshot(ticker=None):
     # process ticker input
     if ticker:
         # get ticker row from asset table (if exists)
+        assets = AssetHandler()
+
         # if not - get ticker data from the aether and put in asset table
         # get corresponding row from asset_meta table (if exists)
         # if not - get metadata from the aether and put in asset_meta table

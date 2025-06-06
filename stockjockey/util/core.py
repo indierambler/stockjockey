@@ -1,7 +1,8 @@
 """High level functions to be called from the flask app"""
 
 # Import dependencies
-from . import period, simfin
+from ..api.service import simfin
+from . import period
 
 
 def get_statements(ticker, n_periods=4):
